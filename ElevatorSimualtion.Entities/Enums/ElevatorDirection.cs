@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ElevatorSimualtion.Entities.Enums
+namespace ElevatorSimulation.Entities.Enums
 {
     public enum ElevatorDirection
     {

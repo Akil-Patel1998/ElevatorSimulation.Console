@@ -1,7 +1,7 @@
 ﻿using System;
-using ElevatorSimualtion.Entities.Enums;
+using ElevatorSimulation.Entities.Enums;
 
-namespace ElevatorSimualtion.Entities.Models
+namespace ElevatorSimulation.Entities.Models
 {
     public class Elevator
     {

@@ -1,4 +1,4 @@
-﻿namespace ElevatorSimualtion.Entities.Models
+﻿namespace ElevatorSimulation.Entities.Models
 {
     public class Passenger
     {
