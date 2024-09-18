@@ -2,7 +2,7 @@
 {
     public class Floor
     {
-        public int FloorNumber { get; }
+        public int FloorNumber { get; set; }
         public int WaitingPassengers { get;  set; }
 
         public Floor(int floorNumber)
