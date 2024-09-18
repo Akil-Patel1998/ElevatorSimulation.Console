@@ -6,5 +6,7 @@ namespace ElevatorSimulation.Core.Interfaces
     {
         Floor GetFloor(int floorNumber);
         void UpdateFloor(int floorNumber, int numberOfPassengers);
+        void AddPassengers(Floor floor, int numberOfPassengers);
+        void RemovePassengers(Floor floor, int numberOfPassengers);
     }
 }

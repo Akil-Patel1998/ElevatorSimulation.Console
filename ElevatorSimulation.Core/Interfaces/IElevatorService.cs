@@ -10,6 +10,6 @@ namespace ElevatorSimulation.Core.Interfaces
         void AddElevator();
         void Board(Elevator elevator, int passengers);
         void Exit(Elevator elevator, int passengers);
-        void MoveToFloor(Elevator elevator, int targetFloor);
+        Task MoveToFloorAsync(Elevator elevator, int targetFloor);
     }
 }
