@@ -1,19 +1,25 @@
-﻿using System.Collections.Generic;
-using ElevatorSimulation.Core.Interfaces;
+﻿using ElevatorSimulation.Core.Interfaces;
 using ElevatorSimulation.Entities.Models;
+using System.Collections.Generic;
 
 namespace ElevatorSimulation.Core.Services
 {
     public class FloorService : IFloorService
     {
         private readonly Dictionary<int, Floor> floors;
+        private readonly int minFloor;
+        private readonly int maxFloor;
 
-
-        public FloorService(int numberOfFloors)
+        public FloorService(int totalFloors, int minFloor = 0, int maxFloor = 10)
         {
-            floors = Enumerable.Range(0, numberOfFloors)
-                               .Select(i => new Floor(i))
-                               .ToDictionary(f => f.FloorNumber);
+            this.minFloor = minFloor;
+            this.maxFloor = maxFloor;
+            floors = new Dictionary<int, Floor>();
+
+            for (int i = minFloor; i <= maxFloor; i++)
+            {
+                floors[i] = new Floor(i);
+            }
         }
 
         public Floor GetFloor(int floorNumber)
@@ -21,35 +27,24 @@ namespace ElevatorSimulation.Core.Services
             return floors.TryGetValue(floorNumber, out var floor) ? floor : null;
         }
 
-        public void UpdateFloor(int floorNumber, int numberOfPassengers)
+        public void UpdateWaitingPassengers(int floorNumber, int numberOfPassengers)
         {
-            if (floors.TryGetValue(floorNumber, out var floor))
+            var floor = GetFloor(floorNumber);
+            if (floor != null)
             {
-                AddPassengers(floor,numberOfPassengers);
+                floor.WaitingPassengers = numberOfPassengers;
+                Console.WriteLine($"Added {numberOfPassengers} passengers waiting on floor {floorNumber}.");
             }
-        }
-        public void AddPassengers(Floor floor, int numberOfPassengers)
-        {
-            if (numberOfPassengers < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(numberOfPassengers), "Number of passengers to add cannot be negative.");
-            }
-            floor.WaitingPassengers+= numberOfPassengers;
-            Console.WriteLine($"Added {numberOfPassengers} passengers to floor {floor.FloorNumber}. Total waiting: {floor.WaitingPassengers}");
         }
 
-        public void RemovePassengers(Floor floor,int numberOfPassengers)
+        public void ClearWaitingPassengers(int floorNumber,int peopleOnBoard)
         {
-            if (numberOfPassengers < 0)
+            var floor = GetFloor(floorNumber);
+            if (floor != null)
             {
-                throw new ArgumentOutOfRangeException(nameof(numberOfPassengers), "Number of passengers to remove cannot be negative.");
+                floor.WaitingPassengers = floor.WaitingPassengers-peopleOnBoard;
+                Console.WriteLine($"Cleared all waiting passengers on floor {floorNumber}.");
             }
-            if (numberOfPassengers > floor.WaitingPassengers)
-            {
-                throw new InvalidOperationException("Cannot remove more passengers than currently waiting.");
-            }
-            floor.WaitingPassengers -= numberOfPassengers;
-            Console.WriteLine($"Removed {numberOfPassengers} passengers from floor {floor.FloorNumber}. Total waiting: {floor.WaitingPassengers}");
         }
     }
 }

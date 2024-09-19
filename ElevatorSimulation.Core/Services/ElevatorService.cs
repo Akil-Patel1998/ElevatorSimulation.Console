@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;  // For asynchronous tasks
+using System.Threading.Tasks;
 using ElevatorSimulation.Core.Interfaces;
 using ElevatorSimulation.Entities.Enums;
 using ElevatorSimulation.Entities.Models;
@@ -54,10 +54,12 @@ namespace ElevatorSimulation.Core.Services
             elevators.Add(newElevator);
             Console.WriteLine($"Added new elevator with ID {newId}.");
         }
+
         public List<Elevator> GetElevators()
         {
             return elevators;
         }
+
         public bool CanBoard(Elevator elevator, int passengers)
         {
             return elevator.PeopleOnBoard + passengers <= elevator.Capacity;
@@ -88,6 +90,71 @@ namespace ElevatorSimulation.Core.Services
                 throw new InvalidOperationException("Cannot remove more passengers than currently on board.");
             }
         }
+
+       
+         public async Task DispatchElevatorAsync(int targetFloor, int waitingPassenger)
+         {
+                var remainingPassengers = waitingPassenger;
+                var dispatchedElevators = new List<Elevator>();
+
+                while (remainingPassengers > 0)
+                {
+                    // Find all available elevators that can accommodate some passengers
+                    var availableElevators = elevators
+                        .Where(e => !e.IsMoving && CanBoard(e, 1)) // Check if the elevator can board at least one passenger
+                        .OrderBy(e => Math.Abs(e.CurrentFloor - targetFloor)) // Sort by proximity to target floor
+                        .ToList();
+
+                    if (!availableElevators.Any())
+                    {
+                        Console.WriteLine("No available elevators that can board any additional passengers.");
+                        break;
+                    }
+
+                    // Dispatch elevators to handle the remaining passengers
+                    foreach (var elevator in availableElevators)
+                    {
+                        if (remainingPassengers <= 0) break;
+
+                        // Move the elevator to the target floor
+                        Console.WriteLine($"Elevator {elevator.Id} is on its way to floor {targetFloor}.");
+                        floorService.UpdateWaitingPassengers(targetFloor, waitingPassenger);
+                        await MoveToFloorAsync(elevator, targetFloor);
+                   
+                        // Determine how many passengers this elevator can board
+                        var passengersToBoard = Math.Min(remainingPassengers, elevator.Capacity - elevator.PeopleOnBoard);
+                        if (passengersToBoard > 0)
+                        {
+                            Board(elevator, passengersToBoard);
+                            Console.WriteLine($"Elevator {elevator.Id} boarded {passengersToBoard} passengers.");
+                            floorService.ClearWaitingPassengers(targetFloor,elevator.PeopleOnBoard);
+                            remainingPassengers -= passengersToBoard;
+                            dispatchedElevators.Add(elevator);
+                        }
+                    }
+
+                    if (remainingPassengers > 0)
+                    {
+                        // If there are still remaining passengers, continue to try with the next available elevators
+                        Console.WriteLine("Still have remaining passengers. Trying with more elevators...");
+                    }
+                }
+
+                if (dispatchedElevators.Any())
+                {
+                    Console.WriteLine("Dispatched elevators:");
+                    foreach (var elevator in dispatchedElevators)
+                    {
+                        Console.WriteLine($"Elevator {elevator.Id} has arrived at floor {elevator.CurrentFloor}.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No elevators dispatched.");
+                }
+         }
+
+        
 
         public async Task MoveToFloorAsync(Elevator elevator, int targetFloor)
         {
