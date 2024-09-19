@@ -94,11 +94,11 @@ namespace ElevatorSimulation.Core.Services
         }
 
 
-        public async Task DispatchElevatorAsync(int sourceFloor, int waitingPassenger, List<int> destinationFloors)
+        public async Task DispatchElevatorAsync(int sourceFloor, int waitingPassenger)
         {
             var remainingPassengers = waitingPassenger;
             var dispatchedElevators = new List<Elevator>();
-
+           
             while (remainingPassengers > 0)
             {
                 // Find all available elevators
@@ -115,6 +115,7 @@ namespace ElevatorSimulation.Core.Services
 
                 foreach (var elevator in availableElevators)
                 {
+                    var destinationFloors = new List<int>();
                     if (remainingPassengers <= 0) break;
 
                     // Move elevator to the source floor
@@ -128,37 +129,37 @@ namespace ElevatorSimulation.Core.Services
                     {
                         Board(elevator, passengersToBoard);
                         Console.WriteLine($"Elevator {elevator.Id} boarded {passengersToBoard} passengers.");
-
+                        for (var i = 0; i < passengersToBoard; i++)
+                        {
+                            Console.Write($"Enter destination floors for passenger {i}: ");
+                            var destinationFloorsInput = int.Parse(Console.ReadLine());
+                            passengerService.AddPassenger(destinationFloorsInput);
+                            destinationFloors.Add(destinationFloorsInput);
+                        }
                         // Update the floor service
                         remainingPassengers -= passengersToBoard;
                         floorService.UpdateWaitingPassengers(sourceFloor, remainingPassengers);
                         dispatchedElevators.Add(elevator);
-                        
+                        destinationFloors=destinationFloors.Distinct().ToList();
                         // Move elevator to the destination floors
                         foreach (var destinationFloor in destinationFloors)
                         {
 
-                           
-
                             Console.WriteLine($"Elevator {elevator.Id} is on its way to floor {destinationFloor}.");
-                            var p=passengerService.GetAllPassengers();
                            
                             await MoveToFloorAsync(elevator, destinationFloor);
-                            var passengersExiting=0;
+                           
                             // Simulate passengers exiting
-                            foreach (var x in p)
+                            var passenger=passengerService.GetPassengersByFloor(destinationFloor).ToList();
+                            Exit(elevator, passenger.Count());
+                            foreach (var p in passenger)
                             {
-                                if (x.DestinationFloor == destinationFloor)
-                                {
-                                    passengersExiting += 1;
-                                   
-
-                                }
+                                passengerService.RemovePassenger(p);
                             }
-                            Exit(elevator, passengersExiting);
                             Console.WriteLine($"Elevator {elevator.Id} exited  passengers at floor {destinationFloor}.");
                         }
                     }
+                      
                 }
 
                 if (remainingPassengers > 0)

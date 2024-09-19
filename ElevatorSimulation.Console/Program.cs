@@ -39,17 +39,10 @@ namespace ElevatorSimulation
                         var floorNumber = int.Parse(Console.ReadLine());
                         Console.Write("Enter the number of passengers waiting: ");
                         var numPassengers = int.Parse(Console.ReadLine());
-                        var destinationFloors=new List<int>();
-                        for (var i= 0; i < numPassengers;i++)
-                        {
-                            Console.Write($"Enter destination floors for passenger {i}: ");
-                            var destinationFloorsInput = int.Parse(Console.ReadLine());
-                            passengerService.AddPassenger(destinationFloorsInput);
-                            destinationFloors.Add(destinationFloorsInput);
-                        }
+                       
                        
 
-                        await elevatorService.DispatchElevatorAsync(floorNumber, numPassengers,destinationFloors);
+                        await elevatorService.DispatchElevatorAsync(floorNumber, numPassengers);
                         break;
 
                     case "2":
