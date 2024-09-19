@@ -54,7 +54,10 @@ namespace ElevatorSimulation.Core.Services
             elevators.Add(newElevator);
             Console.WriteLine($"Added new elevator with ID {newId}.");
         }
-
+        public List<Elevator> GetElevators()
+        {
+            return elevators;
+        }
         public bool CanBoard(Elevator elevator, int passengers)
         {
             return elevator.PeopleOnBoard + passengers <= elevator.Capacity;
