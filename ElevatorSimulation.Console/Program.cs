@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ElevatorSimulation.Core.Interfaces;
 using ElevatorSimulation.Core.Services;
+using ElevatorSimulation.Entities.Models;
 
 namespace ElevatorSimulation
 {
@@ -14,7 +17,8 @@ namespace ElevatorSimulation
             int elevatorCapacity = 8; // Set elevator capacity (number of passengers it can hold)
 
             var floorService = new FloorService(totalFloors);
-            var elevatorService = new ElevatorService(numberOfElevators, elevatorCapacity, floorService);
+            var passengerService = new PassengerService();
+            var elevatorService = new ElevatorService(numberOfElevators, elevatorCapacity, floorService, passengerService);
 
             while (true)
             {
@@ -35,12 +39,17 @@ namespace ElevatorSimulation
                         var floorNumber = int.Parse(Console.ReadLine());
                         Console.Write("Enter the number of passengers waiting: ");
                         var numPassengers = int.Parse(Console.ReadLine());
-                        Console.Write("Enter destination floors (comma-separated): ");
-                        var destinationFloorsInput = Console.ReadLine();
-                        var destinationFloors = destinationFloorsInput.Split(',').Select(int.Parse).ToList();
+                        var destinationFloors=new List<int>();
+                        for (var i= 0; i < numPassengers;i++)
+                        {
+                            Console.Write($"Enter destination floors for passenger {i}: ");
+                            var destinationFloorsInput = int.Parse(Console.ReadLine());
+                            passengerService.AddPassenger(destinationFloorsInput);
+                            destinationFloors.Add(destinationFloorsInput);
+                        }
+                       
 
-                        floorService.UpdateWaitingPassengers(floorNumber, numPassengers, destinationFloors);
-                        await elevatorService.DispatchElevatorAsync(floorNumber, numPassengers, destinationFloors);
+                        await elevatorService.DispatchElevatorAsync(floorNumber, numPassengers,destinationFloors);
                         break;
 
                     case "2":
@@ -52,7 +61,7 @@ namespace ElevatorSimulation
                         var updateDestFloorsInput = Console.ReadLine();
                         var updateDestFloors = updateDestFloorsInput.Split(',').Select(int.Parse).ToList();
 
-                        floorService.UpdateWaitingPassengers(updateFloorNumber, updateNumPassengers, updateDestFloors);
+                        floorService.UpdateWaitingPassengers(updateFloorNumber, updateNumPassengers);
                         break;
 
                     case "3":
@@ -62,7 +71,7 @@ namespace ElevatorSimulation
                     case "4":
                         foreach (var floor in floorService.GetAllFloors())
                         {
-                            Console.WriteLine($"Floor {floor.FloorNumber}: People Waiting: {floor.WaitingPassengers}, Destination Floors: {string.Join(",", floor.DestinationFloors)}");
+                            Console.WriteLine($"Floor {floor.FloorNumber}: People Waiting: {floor.WaitingPassengers}");
                         }
                         break;
 

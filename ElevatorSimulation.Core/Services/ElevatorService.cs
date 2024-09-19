@@ -13,13 +13,15 @@ namespace ElevatorSimulation.Core.Services
         private readonly List<Elevator> elevators;
         private readonly int elevatorCapacity;
         private readonly IFloorService floorService;
+        private readonly IPassengerService passengerService;
         private readonly int minFloor;
         private readonly int maxFloor;
 
-        public ElevatorService(int numberOfElevators, int elevatorCapacity, IFloorService floorService, int minFloor = 0, int maxFloor = 10)
+        public ElevatorService(int numberOfElevators, int elevatorCapacity, IFloorService floorService,IPassengerService passengerService ,int minFloor = 0, int maxFloor = 10)
         {
             this.elevatorCapacity = elevatorCapacity;
             this.floorService = floorService;
+            this.passengerService = passengerService;
             this.minFloor = minFloor;
             this.maxFloor = maxFloor;
 
@@ -128,22 +130,33 @@ namespace ElevatorSimulation.Core.Services
                         Console.WriteLine($"Elevator {elevator.Id} boarded {passengersToBoard} passengers.");
 
                         // Update the floor service
-                 //       floorService.ClearWaitingPassengers(sourceFloor);
                         remainingPassengers -= passengersToBoard;
+                        floorService.UpdateWaitingPassengers(sourceFloor, remainingPassengers);
                         dispatchedElevators.Add(elevator);
-
+                        
                         // Move elevator to the destination floors
                         foreach (var destinationFloor in destinationFloors)
                         {
-                            if (remainingPassengers <= 0) break;
+
+                           
 
                             Console.WriteLine($"Elevator {elevator.Id} is on its way to floor {destinationFloor}.");
+                            var p=passengerService.GetAllPassengers();
+                           
                             await MoveToFloorAsync(elevator, destinationFloor);
-
+                            var passengersExiting=0;
                             // Simulate passengers exiting
-                            var passengersExiting = elevator.PeopleOnBoard;
+                            foreach (var x in p)
+                            {
+                                if (x.DestinationFloor == destinationFloor)
+                                {
+                                    passengersExiting += 1;
+                                   
+
+                                }
+                            }
                             Exit(elevator, passengersExiting);
-                            Console.WriteLine($"Elevator {elevator.Id} exited all passengers at floor {destinationFloor}.");
+                            Console.WriteLine($"Elevator {elevator.Id} exited  passengers at floor {destinationFloor}.");
                         }
                     }
                 }
