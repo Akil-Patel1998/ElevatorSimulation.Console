@@ -8,7 +8,7 @@ namespace ElevatorSimulation.Core.Interfaces
     {
 
         Elevator FindNearestAvailableElevator(int targetFloor, int waitingPassenger);
-        Task DispatchElevatorAsync(int targetFloor, int waitingPassenger);
+        Task DispatchElevatorAsync(int sourceFloor, int waitingPassenger, List<int> destinationFloors);
         void ShowElevatorStatus();
         void AddElevator();
         List<Elevator> GetElevators();

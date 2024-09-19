@@ -91,70 +91,85 @@ namespace ElevatorSimulation.Core.Services
             }
         }
 
-       
-         public async Task DispatchElevatorAsync(int targetFloor, int waitingPassenger)
-         {
-                var remainingPassengers = waitingPassenger;
-                var dispatchedElevators = new List<Elevator>();
 
-                while (remainingPassengers > 0)
+        public async Task DispatchElevatorAsync(int sourceFloor, int waitingPassenger, List<int> destinationFloors)
+        {
+            var remainingPassengers = waitingPassenger;
+            var dispatchedElevators = new List<Elevator>();
+
+            while (remainingPassengers > 0)
+            {
+                // Find all available elevators
+                var availableElevators = elevators
+                    .Where(e => !e.IsMoving && CanBoard(e, 1)) // Check if the elevator can board at least one passenger
+                    .OrderBy(e => Math.Abs(e.CurrentFloor - sourceFloor)) // Sort by proximity to source floor
+                    .ToList();
+
+                if (!availableElevators.Any())
                 {
-                    // Find all available elevators that can accommodate some passengers
-                    var availableElevators = elevators
-                        .Where(e => !e.IsMoving && CanBoard(e, 1)) // Check if the elevator can board at least one passenger
-                        .OrderBy(e => Math.Abs(e.CurrentFloor - targetFloor)) // Sort by proximity to target floor
-                        .ToList();
+                    Console.WriteLine("No available elevators that can board any additional passengers.");
+                    break;
+                }
 
-                    if (!availableElevators.Any())
+                foreach (var elevator in availableElevators)
+                {
+                    if (remainingPassengers <= 0) break;
+
+                    // Move elevator to the source floor
+                    Console.WriteLine($"Elevator {elevator.Id} is on its way to floor {sourceFloor}.");
+                    
+                    await MoveToFloorAsync(elevator, sourceFloor);
+
+                    // Determine how many passengers this elevator can board
+                    var passengersToBoard = Math.Min(remainingPassengers, elevator.Capacity - elevator.PeopleOnBoard);
+                    if (passengersToBoard > 0)
                     {
-                        Console.WriteLine("No available elevators that can board any additional passengers.");
-                        break;
-                    }
+                        Board(elevator, passengersToBoard);
+                        Console.WriteLine($"Elevator {elevator.Id} boarded {passengersToBoard} passengers.");
 
-                    // Dispatch elevators to handle the remaining passengers
-                    foreach (var elevator in availableElevators)
-                    {
-                        if (remainingPassengers <= 0) break;
+                        // Update the floor service
+                 //       floorService.ClearWaitingPassengers(sourceFloor);
+                        remainingPassengers -= passengersToBoard;
+                        dispatchedElevators.Add(elevator);
 
-                        // Move the elevator to the target floor
-                        Console.WriteLine($"Elevator {elevator.Id} is on its way to floor {targetFloor}.");
-                        floorService.UpdateWaitingPassengers(targetFloor, waitingPassenger);
-                        await MoveToFloorAsync(elevator, targetFloor);
-                   
-                        // Determine how many passengers this elevator can board
-                        var passengersToBoard = Math.Min(remainingPassengers, elevator.Capacity - elevator.PeopleOnBoard);
-                        if (passengersToBoard > 0)
+                        // Move elevator to the destination floors
+                        foreach (var destinationFloor in destinationFloors)
                         {
-                            Board(elevator, passengersToBoard);
-                            Console.WriteLine($"Elevator {elevator.Id} boarded {passengersToBoard} passengers.");
-                            floorService.ClearWaitingPassengers(targetFloor,elevator.PeopleOnBoard);
-                            remainingPassengers -= passengersToBoard;
-                            dispatchedElevators.Add(elevator);
+                            if (remainingPassengers <= 0) break;
+
+                            Console.WriteLine($"Elevator {elevator.Id} is on its way to floor {destinationFloor}.");
+                            await MoveToFloorAsync(elevator, destinationFloor);
+
+                            // Simulate passengers exiting
+                            var passengersExiting = elevator.PeopleOnBoard;
+                            Exit(elevator, passengersExiting);
+                            Console.WriteLine($"Elevator {elevator.Id} exited all passengers at floor {destinationFloor}.");
                         }
                     }
-
-                    if (remainingPassengers > 0)
-                    {
-                        // If there are still remaining passengers, continue to try with the next available elevators
-                        Console.WriteLine("Still have remaining passengers. Trying with more elevators...");
-                    }
                 }
 
-                if (dispatchedElevators.Any())
+                if (remainingPassengers > 0)
                 {
-                    Console.WriteLine("Dispatched elevators:");
-                    foreach (var elevator in dispatchedElevators)
-                    {
-                        Console.WriteLine($"Elevator {elevator.Id} has arrived at floor {elevator.CurrentFloor}.");
-                    }
+                    Console.WriteLine("Still have remaining passengers. Trying with more elevators...");
                 }
-                else
-                {
-                    Console.WriteLine("No elevators dispatched.");
-                }
-         }
+            }
 
-        
+            if (dispatchedElevators.Any())
+            {
+                Console.WriteLine("Dispatched elevators:");
+                foreach (var elevator in dispatchedElevators)
+                {
+                    Console.WriteLine($"Elevator {elevator.Id} has arrived at floor {elevator.CurrentFloor}.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No elevators dispatched.");
+            }
+        }
+
+
+
 
         public async Task MoveToFloorAsync(Elevator elevator, int targetFloor)
         {

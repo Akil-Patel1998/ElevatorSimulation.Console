@@ -10,41 +10,47 @@ namespace ElevatorSimulation.Core.Services
         private readonly int minFloor;
         private readonly int maxFloor;
 
-        public FloorService(int totalFloors, int minFloor = 0, int maxFloor = 10)
+        public FloorService(int totalFloors)
         {
-            this.minFloor = minFloor;
-            this.maxFloor = maxFloor;
+            minFloor = 0;
+            maxFloor = totalFloors - 1;
             floors = new Dictionary<int, Floor>();
 
+            // Initialize floors with zero waiting passengers
             for (int i = minFloor; i <= maxFloor; i++)
             {
                 floors[i] = new Floor(i);
             }
         }
 
+
+        public void UpdateWaitingPassengers(int floorNumber, int count, List<int> destinationFloors)
+        {
+            if (floors.ContainsKey(floorNumber))
+            {
+                var floor = floors[floorNumber];
+                floor.WaitingPassengers = count;
+                floor.DestinationFloors = destinationFloors;
+            }
+        }
+
         public Floor GetFloor(int floorNumber)
         {
-            return floors.TryGetValue(floorNumber, out var floor) ? floor : null;
+            return floors.ContainsKey(floorNumber) ? floors[floorNumber] : null;
         }
 
-        public void UpdateWaitingPassengers(int floorNumber, int numberOfPassengers)
+        public void ClearWaitingPassengers(int floorNumber)
         {
-            var floor = GetFloor(floorNumber);
-            if (floor != null)
+            if (floors.ContainsKey(floorNumber))
             {
-                floor.WaitingPassengers = numberOfPassengers;
-                Console.WriteLine($"Added {numberOfPassengers} passengers waiting on floor {floorNumber}.");
+                var floor = floors[floorNumber];
+                floor.WaitingPassengers = 0;
+                floor.DestinationFloors.Clear();
             }
         }
-
-        public void ClearWaitingPassengers(int floorNumber,int peopleOnBoard)
+        public IEnumerable<Floor> GetAllFloors()
         {
-            var floor = GetFloor(floorNumber);
-            if (floor != null)
-            {
-                floor.WaitingPassengers = floor.WaitingPassengers-peopleOnBoard;
-                Console.WriteLine($"Cleared all waiting passengers on floor {floorNumber}.");
-            }
+            return floors.Values;
         }
     }
 }

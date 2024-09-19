@@ -32,20 +32,27 @@ namespace ElevatorSimulation
                 {
                     case "1":
                         Console.Write("Enter the floor number to call the elevator to: ");
-                        int targetFloor = int.Parse(Console.ReadLine());
+                        var floorNumber = int.Parse(Console.ReadLine());
                         Console.Write("Enter the number of passengers waiting: ");
-                        int waitingPassengers = int.Parse(Console.ReadLine());
+                        var numPassengers = int.Parse(Console.ReadLine());
+                        Console.Write("Enter destination floors (comma-separated): ");
+                        var destinationFloorsInput = Console.ReadLine();
+                        var destinationFloors = destinationFloorsInput.Split(',').Select(int.Parse).ToList();
 
-                        await elevatorService.DispatchElevatorAsync(targetFloor, waitingPassengers);
+                        floorService.UpdateWaitingPassengers(floorNumber, numPassengers, destinationFloors);
+                        await elevatorService.DispatchElevatorAsync(floorNumber, numPassengers, destinationFloors);
                         break;
 
                     case "2":
-                        Console.Write("Enter the floor number to update: ");
-                        int updateFloor = int.Parse(Console.ReadLine());
-                        Console.Write("Enter the number of waiting passengers: ");
-                        int numberOfPassengers = int.Parse(Console.ReadLine());
+                        Console.Write("Enter the floor number to update passengers: ");
+                        var updateFloorNumber = int.Parse(Console.ReadLine());
+                        Console.Write("Enter the number of passengers waiting: ");
+                        var updateNumPassengers = int.Parse(Console.ReadLine());
+                        Console.Write("Enter destination floors (comma-separated): ");
+                        var updateDestFloorsInput = Console.ReadLine();
+                        var updateDestFloors = updateDestFloorsInput.Split(',').Select(int.Parse).ToList();
 
-                        floorService.UpdateWaitingPassengers(updateFloor, numberOfPassengers);
+                        floorService.UpdateWaitingPassengers(updateFloorNumber, updateNumPassengers, updateDestFloors);
                         break;
 
                     case "3":
@@ -53,13 +60,9 @@ namespace ElevatorSimulation
                         break;
 
                     case "4":
-                        for (int i = 0; i <= totalFloors; i++)
+                        foreach (var floor in floorService.GetAllFloors())
                         {
-                            var floor = floorService.GetFloor(i);
-                            if (floor != null)
-                            {
-                                Console.WriteLine($"Floor {floor.FloorNumber}: People Waiting: {floor.WaitingPassengers}");
-                            }
+                            Console.WriteLine($"Floor {floor.FloorNumber}: People Waiting: {floor.WaitingPassengers}, Destination Floors: {string.Join(",", floor.DestinationFloors)}");
                         }
                         break;
 
@@ -71,7 +74,7 @@ namespace ElevatorSimulation
                         return;
 
                     default:
-                        Console.WriteLine("Invalid option. Please select a valid option.");
+                        Console.WriteLine("Invalid option. Please try again.");
                         break;
                 }
             }
