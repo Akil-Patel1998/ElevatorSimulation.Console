@@ -16,13 +16,7 @@ namespace ElevatorSimulation.Core.Services
         private readonly int minFloor;
         private readonly int maxFloor;
 
-        public ElevatorService(
-            int numberOfElevators,
-            int elevatorCapacity,
-            IFloorService floorService,
-            IPassengerService passengerService,
-            int minFloor = 0,
-            int maxFloor = 10)
+        public ElevatorService(int numberOfElevators,int elevatorCapacity, IFloorService floorService, IPassengerService passengerService,int minFloor = 0, int maxFloor = 10)
         {
             this.floorService = floorService;
             this.passengerService = passengerService;
@@ -76,7 +70,8 @@ namespace ElevatorSimulation.Core.Services
 
         public void AddElevator(string elevatorType)
         {
-            var newId = elevators.Any() ? elevators.Max(e => e.Id) + 1 : 0;
+            // Change to start from 1
+            var newId = elevators.Any() ? elevators.Max(e => e.Id) + 1 : 1;
             Elevator newElevator;
 
             switch (elevatorType.ToLower())
@@ -100,6 +95,7 @@ namespace ElevatorSimulation.Core.Services
             elevators.Add(newElevator);
             Console.WriteLine($"Added new {elevatorType} elevator with ID {newId}.");
         }
+
 
         public List<Elevator> GetElevators()
         {
@@ -153,28 +149,14 @@ namespace ElevatorSimulation.Core.Services
             elevator.IsMoving = true;
             elevator.Direction = targetFloor > elevator.CurrentFloor ? ElevatorDirection.Up : ElevatorDirection.Down;
 
-            while (elevator.CurrentFloor != targetFloor)
-            {
-                Console.WriteLine($"{elevator.GetType().Name} {elevator.Id} is passing floor {elevator.CurrentFloor} going {elevator.Direction}.");
-                elevator.CurrentFloor += (elevator.Direction == ElevatorDirection.Up) ? 1 : -1;
-
-                await elevator.MoveToFloorAsync(elevator.CurrentFloor);
-
-                var currentFloorStatus = floorService.GetFloor(elevator.CurrentFloor);
-                if (currentFloorStatus != null)
-                {
-                    Console.WriteLine($"Floor {elevator.CurrentFloor}: People Waiting: {currentFloorStatus.WaitingPassengers}");
-                }
-                else
-                {
-                    Console.WriteLine($"Floor {elevator.CurrentFloor}: Status unknown.");
-                }
-            }
+            // Call the elevator's own MoveToFloorAsync method to handle the movement
+            await elevator.MoveToFloorAsync(targetFloor);
 
             Console.WriteLine($"{elevator.GetType().Name} {elevator.Id} has arrived at floor {elevator.CurrentFloor}.");
             elevator.IsMoving = false;
             elevator.Direction = ElevatorDirection.Stationary;
         }
+
 
         public async Task DispatchElevatorAsync(int sourceFloor, int waitingPassengers)
         {
@@ -210,8 +192,18 @@ namespace ElevatorSimulation.Core.Services
                         var destinationFloors = new List<int>();
                         for (var i = 0; i < passengersToBoard; i++)
                         {
-                            Console.Write($"Enter destination floor for passenger {i + 1}: ");
-                            var destinationFloor = int.Parse(Console.ReadLine());
+                            int destinationFloor;
+                            while (true)
+                            {
+                                Console.Write($"Enter destination floor for passenger {i + 1}: ");
+                                if (int.TryParse(Console.ReadLine(), out destinationFloor) &&
+                                    destinationFloor >= minFloor && destinationFloor <= maxFloor)
+                                {
+                                    break; // valid input
+                                }
+                                Console.WriteLine($"Please enter a valid floor between {minFloor} and {maxFloor}.");
+                            }
+
                             passengerService.AddPassenger(destinationFloor);
                             destinationFloors.Add(destinationFloor);
                         }
