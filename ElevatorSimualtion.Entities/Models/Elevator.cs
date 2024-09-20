@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ElevatorSimulation.Entities.Enums;
 
 namespace ElevatorSimulation.Entities.Models
@@ -31,7 +32,12 @@ namespace ElevatorSimulation.Entities.Models
 
         public override async Task MoveToFloorAsync(int targetFloor)
         {
-            await Task.Delay(1000); // Simulating movement time
+            while (CurrentFloor != targetFloor)
+            {
+                Console.WriteLine($"{GetType().Name} {Id} is passing floor {CurrentFloor} going {(targetFloor > CurrentFloor ? "up" : "down")}.");
+                await Task.Delay(1000); // Simulating movement time
+                CurrentFloor += (targetFloor > CurrentFloor) ? 1 : -1;
+            }
         }
     }
 
@@ -41,7 +47,12 @@ namespace ElevatorSimulation.Entities.Models
 
         public override async Task MoveToFloorAsync(int targetFloor)
         {
-            await Task.Delay(500); // Simulating faster movement time
+            while (CurrentFloor != targetFloor)
+            {
+                Console.WriteLine($"{GetType().Name} {Id} is passing floor {CurrentFloor} going {(targetFloor > CurrentFloor ? "up" : "down")}.");
+                await Task.Delay(500); // Simulating faster movement time
+                CurrentFloor += (targetFloor > CurrentFloor) ? 1 : -1;
+            }
         }
     }
 
@@ -51,7 +62,12 @@ namespace ElevatorSimulation.Entities.Models
 
         public override async Task MoveToFloorAsync(int targetFloor)
         {
-            await Task.Delay(1200); // Simulating slightly slower movement for scenic views
+            while (CurrentFloor != targetFloor)
+            {
+                Console.WriteLine($"{GetType().Name} {Id} is passing floor {CurrentFloor} going {(targetFloor > CurrentFloor ? "up" : "down")}.");
+                await Task.Delay(1200); // Simulating slightly slower movement for scenic views
+                CurrentFloor += (targetFloor > CurrentFloor) ? 1 : -1;
+            }
         }
     }
 
@@ -66,7 +82,12 @@ namespace ElevatorSimulation.Entities.Models
 
         public override async Task MoveToFloorAsync(int targetFloor)
         {
-            await Task.Delay(1500); // Simulating slower movement due to heavy loads
+            while (CurrentFloor != targetFloor)
+            {
+                Console.WriteLine($"{GetType().Name} {Id} is passing floor {CurrentFloor} going {(targetFloor > CurrentFloor ? "up" : "down")}.");
+                await Task.Delay(1500); // Simulating slower movement due to heavy loads
+                CurrentFloor += (targetFloor > CurrentFloor) ? 1 : -1;
+            }
         }
     }
 }
