@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ElevatorSimulation.Core.Interfaces;
-using ElevatorSimulation.Core.Services;
-using ElevatorSimulation.Entities.Models;
+﻿using ElevatorSimulation.Core.Services;
 
 namespace ElevatorSimulation
 {
@@ -12,18 +6,20 @@ namespace ElevatorSimulation
     {
         static async Task Main(string[] args)
         {
-            // Initialize the simulation
-            int totalFloors = 10;
-            int numberOfElevators = 3;
-            int elevatorCapacity = 8;
+            // Initialize the simulation with total floors and elevator configurations
+            int totalFloors = 10; // Total number of floors in the building
+            int numberOfElevators = 3; // Number of elevators in the system
+            int elevatorCapacity = 8; // Capacity of each elevator
+
+            // Create instances of floor, passenger, and elevator services
             var floorService = new FloorService(totalFloors);
             var passengerService = new PassengerService();
             var elevatorService = new ElevatorService(numberOfElevators, elevatorCapacity, floorService, passengerService);
 
-            // Main loop
+            // Main loop for user interaction
             while (true)
             {
-                // Display menu
+                // Display menu options to the user
                 Console.WriteLine("Elevator Control System");
                 Console.WriteLine("1. Call an elevator");
                 Console.WriteLine("2. Update passengers on a floor");
@@ -32,50 +28,57 @@ namespace ElevatorSimulation
                 Console.WriteLine("5. Add a new elevator");
                 Console.WriteLine("6. Exit");
                 Console.Write("Select an option: ");
-                var option = Console.ReadLine();
+                var option = Console.ReadLine(); // Get user input
 
                 switch (option)
                 {
                     case "1":
-                        // Call an elevator
+                        // Call an elevator to a specified floor
                         Console.Write("Enter the floor number to call the elevator to: ");
-                        var floorNumber = int.Parse(Console.ReadLine());
+                        var floorNumber = int.Parse(Console.ReadLine()); // Parse floor number input
                         Console.Write("Enter the number of passengers waiting: ");
-                        var numPassengers = int.Parse(Console.ReadLine());
-                        await elevatorService.DispatchElevatorAsync(floorNumber, numPassengers);
+                        var numPassengers = int.Parse(Console.ReadLine()); // Parse number of waiting passengers
+                        await elevatorService.DispatchElevatorAsync(floorNumber, numPassengers); // Dispatch the elevator
                         break;
+
                     case "2":
-                        // Update passengers on a floor
+                        // Update the number of passengers waiting on a specified floor
                         Console.Write("Enter the floor number to update passengers: ");
-                        var updateFloorNumber = int.Parse(Console.ReadLine());
+                        var updateFloorNumber = int.Parse(Console.ReadLine()); // Parse floor number
                         Console.Write("Enter the number of passengers waiting: ");
-                        var updateNumPassengers = int.Parse(Console.ReadLine());
+                        var updateNumPassengers = int.Parse(Console.ReadLine()); // Parse updated passenger count
                         Console.Write("Enter destination floors (comma-separated): ");
-                        var updateDestFloorsInput = Console.ReadLine();
-                        var updateDestFloors = updateDestFloorsInput.Split(',').Select(int.Parse).ToList();
-                        floorService.UpdateWaitingPassengers(updateFloorNumber, updateNumPassengers);
+                        var updateDestFloorsInput = Console.ReadLine(); // Get destination floors as input
+                        var updateDestFloors = updateDestFloorsInput.Split(',').Select(int.Parse).ToList(); // Parse input into list
+                        floorService.UpdateWaitingPassengers(updateFloorNumber, updateNumPassengers); // Update waiting passengers
                         break;
+
                     case "3":
-                        // Show elevator status
+                        // Display the status of all elevators
                         elevatorService.ShowElevatorStatus();
                         break;
+
                     case "4":
-                        // Show floor status
+                        // Display the status of all floors
                         foreach (var floor in floorService.GetAllFloors())
                         {
                             Console.WriteLine($"Floor {floor.FloorNumber}: People Waiting: {floor.WaitingPassengers}");
                         }
                         break;
+
                     case "5":
-                        // Add a new elevator
+                        // Add a new elevator of a specified type
                         Console.Write("Enter elevator type (standard/highspeed/glass/freight): ");
-                        var elevatorType = Console.ReadLine();
-                        elevatorService.AddElevator(elevatorType);
+                        var elevatorType = Console.ReadLine(); // Get elevator type input
+                        elevatorService.AddElevator(elevatorType); // Add the new elevator
                         break;
+
                     case "6":
                         // Exit the program
-                        return;
+                        return; // Terminate the main loop
+
                     default:
+                        // Handle invalid input
                         Console.WriteLine("Invalid option. Please try again.");
                         break;
                 }
