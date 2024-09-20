@@ -1,12 +1,13 @@
 ﻿using ElevatorSimulation.Entities.Models;
+using ElevatorSimulation.Core.Interfaces;
+using System.Security.Cryptography;
 
 namespace ElevatorSimulation.Core.Interfaces
 {
     public interface IFloorService
     {
         Floor GetFloor(int floorNumber);
-        void UpdateFloor(int floorNumber, int numberOfPassengers);
-        void AddPassengers(Floor floor, int numberOfPassengers);
-        void RemovePassengers(Floor floor, int numberOfPassengers);
+        void UpdateWaitingPassengers(int floorNumber, int waitingPassengers);
+        IEnumerable<Floor> GetAllFloors();
     }
 }
