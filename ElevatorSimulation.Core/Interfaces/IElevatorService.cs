@@ -10,7 +10,7 @@ namespace ElevatorSimulation.Core.Interfaces
         Elevator FindNearestAvailableElevator(int targetFloor, int waitingPassenger);
         Task DispatchElevatorAsync(int sourceFloor, int waitingPassenger);
         void ShowElevatorStatus();
-        void AddElevator();
+        void AddElevator(string elevatorType);
         List<Elevator> GetElevators();
         bool CanBoard(Elevator elevator, int passengers);
         void Board(Elevator elevator, int passengers);

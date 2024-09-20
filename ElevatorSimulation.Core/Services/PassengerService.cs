@@ -35,5 +35,10 @@ namespace ElevatorSimulation.Core.Services
         {
             return passengers.Where(p => p.DestinationFloor == floorNumber);
         }
+
+        public void RemovePassengersByFloor(int floorNumber)
+        {
+            passengers.RemoveAll(p => p.DestinationFloor == floorNumber);
+        }
     }
 }

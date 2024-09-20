@@ -6,8 +6,8 @@ namespace ElevatorSimulation.Core.Interfaces
 {
     public interface IFloorService
     {
-        void UpdateWaitingPassengers(int floorNumber, int count);
         Floor GetFloor(int floorNumber);
+        void UpdateWaitingPassengers(int floorNumber, int waitingPassengers);
         IEnumerable<Floor> GetAllFloors();
     }
 }

@@ -8,5 +8,6 @@ namespace ElevatorSimulation.Core.Interfaces
         void RemovePassenger(Passenger passenger);
         IEnumerable<Passenger> GetAllPassengers();
         IEnumerable<Passenger> GetPassengersByFloor(int floorNumber);
+        void RemovePassengersByFloor(int floorNumber);
     }
 }
