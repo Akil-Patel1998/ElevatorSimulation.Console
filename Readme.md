@@ -12,4 +12,4 @@ Elevator Simulation is a software application that simulates the behavior of ele
 ## Installation
 1. **Clone the repository**:
    ```bash
-   git clone https://patelakil1998@dev.azure.com/patelakil1998/ElevatorSimulationChallenge/_git/ElevatorSimulation
+   git clone https://github.com/Akil-Patel1998/ElevatorSimulation.Console
